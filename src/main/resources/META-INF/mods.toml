@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="MIT"
+
+[[mods]]
+modId="recipehistory"
+version="1.0.0rc1"
+displayName="JEI Recipe History"
+authors="Spoony Panda"
+description='''Tracks and Displays JEI Recipe Views. Inspired by JEI Utilities for 1.12.2'''
+mixinConfigs = ["recipehistory.mixins.json"]
+
+[[dependencies.recipehistory]]
+modId="forge"
+mandatory=true
+versionRange="[36.2.34,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.recipehistory]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.16.5,1.17)"
+ordering="NONE"
+side="BOTH"
+

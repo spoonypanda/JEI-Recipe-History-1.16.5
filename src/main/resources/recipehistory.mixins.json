@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "package": "com.spoonypanda.recipehistory.mixins",
+  "client": [
+    "ScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "recipehistory.mixins-refmap.json"
+}
