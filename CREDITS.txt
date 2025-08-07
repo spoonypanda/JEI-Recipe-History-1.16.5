@@ -1,3 +1,18 @@
+First off props to Mezz for JEI.
+
+Also thank you to other creators like Christofmeg and vfyjxf_ for their work and inspiration between other versions of the recipe history.
+
+Thank you to DreammasterXXL and the team for GTNH and spoiling the shit outta me with QoL features all over the place (seriously NEI in that is CRACKED)
+
+Here's links to their projects:
+
+<a href src="https://www.curseforge.com/minecraft/mc-mods/jei-utilities">JEI Utilities</a> -- for 1.12.2<br />
+<a href src="https://www.curseforge.com/minecraft/mc-mods/jei-recipe-history">JEI Recipe History</a> -- 1.18.2<br />
+
+And don't forget, if you want item highlighting for current search in JEI, go check out <a href="https://www.curseforge.com/minecraft/mc-mods/more-overlays-updated">More Overlays</a>.
+
+=========================================================================
+
 Minecraft Forge: Credits/Thank You
 
 Forge is a set of tools and modifications to the Minecraft base game code to assist 
