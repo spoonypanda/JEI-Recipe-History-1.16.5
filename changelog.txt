@@ -1,2 +1,13 @@
+1.0.0rc2 -
+
+Bug Fixes:
+-- Fixed an issue where polling layouts was causing conflict with other mods drawing to the screen
+
+Changes:
+-- Re-wrote much of the backend to harness mixins accessors instead of the much more hacky reflections
+
+To-Do:
+-- Fix issue where reserved area isn't quite right with Center Search enabled in JEI
+
 1.0.0rc1 -
 Initial Commit
