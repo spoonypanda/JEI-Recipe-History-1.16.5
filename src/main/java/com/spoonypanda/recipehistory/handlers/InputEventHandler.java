@@ -3,7 +3,10 @@ package com.spoonypanda.recipehistory.handlers;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import com.spoonypanda.recipehistory.RecipeHistory;
 import com.spoonypanda.recipehistory.RecipeHistoryJEIPlugin;
+import com.spoonypanda.recipehistory.mixins.BookmarkListInvokerMixin;
+import com.spoonypanda.recipehistory.mixins.BookmarkOverlayAccessorMixin;
 import com.spoonypanda.recipehistory.screens.ScreenOverlayRenderer;
 import com.spoonypanda.recipehistory.util.HistoryEntry;
 import com.spoonypanda.recipehistory.util.KeyBindingLookup;
@@ -14,9 +17,9 @@ import mezz.jei.api.runtime.IBookmarkOverlay;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.api.runtime.IRecipesGui;
 
+import mezz.jei.bookmarks.BookmarkList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
@@ -24,17 +27,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @OnlyIn(Dist.CLIENT)
-@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = "recipehistory", bus = Mod.EventBusSubscriber.Bus.FORGE)
+@Mod.EventBusSubscriber(value = Dist.CLIENT, modid = RecipeHistory.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class InputEventHandler {
-
     @SubscribeEvent
     public static void onGuiClick(GuiScreenEvent.MouseClickedEvent.Pre event) {
         Screen screen = event.getGui();
         int mouseX = (int) event.getMouseX();
         int mouseY = (int) event.getMouseY();
         int button = event.getButton();
-
-        ScreenOverlayRenderer.handleMouseClicked(screen, mouseX, mouseY, button);
+        if (ScreenOverlayRenderer.handleMouseClicked(screen, mouseX, mouseY, button)) {
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent
@@ -48,19 +51,14 @@ public class InputEventHandler {
         HistoryEntry hovered = ScreenOverlayRenderer.getHoveredEntryAt((int) mouseX, (int) mouseY);
 
         if (hovered != HistoryEntry.EMPTY) {
-            if (hovered == null || hovered == HistoryEntry.EMPTY) return;
 
-            KeyBinding showRecipes = KeyBindingLookup.getKeyBindingByTranslationKey("key.jei.showRecipe");
-            KeyBinding showUses = KeyBindingLookup.getKeyBindingByTranslationKey("key.jei.showUses");
-            KeyBinding toggleBookmark = KeyBindingLookup.getKeyBindingByTranslationKey("key.jei.bookmark");
-
-            if (showRecipes != null && keyCode == showRecipes.getKey().getValue()) {
+            if (KeyBindingLookup.showRecipes() != null && keyCode == KeyBindingLookup.showRecipes().getKey().getValue()) {
                 showJei(hovered, IFocus.Mode.OUTPUT);
                 event.setCanceled(true);
-            } else if (showUses != null && keyCode == showUses.getKey().getValue()) {
+            } else if (KeyBindingLookup.showUses() != null && keyCode == KeyBindingLookup.showUses().getKey().getValue()) {
                 showJei(hovered, IFocus.Mode.INPUT);
                 event.setCanceled(true);
-            } else if (toggleBookmark != null && keyCode == toggleBookmark.getKey().getValue()) {
+            } else if (KeyBindingLookup.toggleBookmark() != null && keyCode == KeyBindingLookup.toggleBookmark().getKey().getValue()) {
                 toggleBookmark(hovered);
                 event.setCanceled(true);
             }
@@ -79,31 +77,24 @@ public class InputEventHandler {
     }
 
     public static void toggleBookmark(HistoryEntry entry) {
-        if (entry == null || entry.focus == null || entry.type == null) return;
+        if (entry == null || entry.focus == null) return;
 
-        IJeiRuntime runtime = RecipeHistoryJEIPlugin.getRuntime();
-        if (runtime == null) return;
+        IJeiRuntime rt = RecipeHistoryJEIPlugin.getRuntime();
+        if (rt == null) return;
 
-        IBookmarkOverlay overlay = runtime.getBookmarkOverlay();
+        IBookmarkOverlay overlay = rt.getBookmarkOverlay();
         if (overlay == null) return;
 
         Object ingredient = entry.focus.getValue();
+        if (ingredient == null) return;
 
-        try {
-            Field listField = overlay.getClass().getDeclaredField("bookmarkList");
-            listField.setAccessible(true);
-            Object bookmarkList = listField.get(overlay);
+        BookmarkList list = ((BookmarkOverlayAccessorMixin) overlay).recipehistory$getBookmarkList();
+        BookmarkListInvokerMixin inv = (BookmarkListInvokerMixin) (Object) list;
 
-            Method containsMethod = bookmarkList.getClass().getDeclaredMethod("contains", Object.class);
-            containsMethod.setAccessible(true);
-            boolean alreadyBookmarked = (boolean) containsMethod.invoke(bookmarkList, ingredient);
-
-            String methodName = alreadyBookmarked ? "remove" : "add";
-            Method method = bookmarkList.getClass().getDeclaredMethod(methodName, Object.class);
-            method.setAccessible(true);
-            method.invoke(bookmarkList, ingredient);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (inv.recipehistory$contains(ingredient)) {
+            inv.recipehistory$remove(ingredient);
+        } else {
+            inv.recipehistory$add(ingredient);
         }
     }
 }

@@ -23,7 +23,7 @@ apply plugin: 'org.spongepowered.mixin'
 
 
 group = "com.spoonypanda.recipehistory"
-version = "1.0.0rc1"
+version = "1.0.0rc2"
 archivesBaseName = "recipehistory"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)

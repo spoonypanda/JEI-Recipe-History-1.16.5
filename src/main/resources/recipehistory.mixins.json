@@ -4,7 +4,14 @@
   "compatibilityLevel": "JAVA_8",
   "package": "com.spoonypanda.recipehistory.mixins",
   "client": [
-    "ScreenMixin"
+    "ScreenMixin",
+    "ContainerScreenRenderMixin",
+    "RecipesGuiRenderMixin",
+    "RecipesGuiAccessorMixin",
+    "RecipesGuiHistoryMixin",
+    "IListOverlayAccessorMixin",
+    "BookmarkListInvokerMixin",
+    "BookmarkOverlayAccessorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

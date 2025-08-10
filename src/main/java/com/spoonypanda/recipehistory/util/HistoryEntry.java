@@ -11,6 +11,7 @@ import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.runtime.IIngredientManager;
 
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
@@ -18,7 +19,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public class HistoryEntry {
     public static final HistoryEntry EMPTY = new HistoryEntry(null, null, null);
-    public final Object recipe; // Can be IRecipe or synthetic
+    public final Object recipe;
     public final IFocus<?> focus;
     public final IIngredientType<?> type;
 
@@ -62,9 +63,13 @@ public class HistoryEntry {
         Object thisValue = this.focus.getValue();
         Object otherValue = other.focus.getValue();
 
-        IIngredientManager ingredientManager = RecipeHistoryJEIPlugin.getRuntime().getIngredientManager();
+        IJeiRuntime rt = RecipeHistoryJEIPlugin.getRuntime();
+        if(rt == null) {
+            if (thisValue.getClass() != otherValue.getClass()) return false;
+            return thisValue.equals(otherValue);
+        }
+        IIngredientManager ingredientManager = rt.getIngredientManager();
 
-        @SuppressWarnings("unchecked")
         IIngredientHelper<Object> helper = (IIngredientHelper<Object>) ingredientManager.getIngredientHelper(this.type);
 
         String idA = helper.getUniqueId(thisValue, UidContext.Ingredient);

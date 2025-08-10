@@ -10,11 +10,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(RecipeHistory.MODID)
 public class RecipeHistory {
 
     public static final String MODID = "recipehistory";
+    public static final Logger LOGGER = LogManager.getLogger("RecipeHistory");
 
     public RecipeHistory() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.COMMON_CONFIG);
@@ -25,5 +28,4 @@ public class RecipeHistory {
         MinecraftForge.EVENT_BUS.register(JEIHooks.class);
         MinecraftForge.EVENT_BUS.register(new InputEventHandler());
     }
-
 }

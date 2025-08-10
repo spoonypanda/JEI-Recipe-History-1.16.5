@@ -3,6 +3,11 @@ package com.spoonypanda.recipehistory;
 import com.spoonypanda.recipehistory.handlers.JEIScreenGUIHandler;
 import com.spoonypanda.recipehistory.handlers.RecipeScreenGUIHandler;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -11,12 +16,10 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.util.ResourceLocation;
 
-import javax.annotation.Nonnull;
 
 @JeiPlugin
 public class RecipeHistoryJEIPlugin implements IModPlugin {
-    private static final ResourceLocation ID = new ResourceLocation("yourmodid", "jei_plugin");
-    private static IJeiRuntime jeiRuntime;
+    private static final ResourceLocation ID = new ResourceLocation("recipehistory", "jei_plugin");
 
     @Nonnull
     @Override
@@ -25,24 +28,22 @@ public class RecipeHistoryJEIPlugin implements IModPlugin {
     }
 
     @Override
-    public void registerGuiHandlers(@Nonnull IGuiHandlerRegistration registration) {
-        System.out.println("Registering All Recipe History Handlers");
-        registration.addGuiContainerHandler(
-                (Class<? extends ContainerScreen<?>>)(Class<?>) ContainerScreen.class,
-                new JEIScreenGUIHandler()
-        );
+    public void registerGuiHandlers(IGuiHandlerRegistration reg) {
+        RecipeHistory.LOGGER.info("Loading all Recipe History handlers.");
+        reg.addGlobalGuiHandler(new RecipeScreenGUIHandler());
 
-        registration.addGlobalGuiHandler(new RecipeScreenGUIHandler());
+        @SuppressWarnings({ "rawtypes", "unchecked" })
+        Class<? extends ContainerScreen<?>> cls = (Class) ContainerScreen.class;
+        reg.addGuiContainerHandler(cls, new JEIScreenGUIHandler<>());
     }
+
+    private static @Nullable IJeiRuntime RUNTIME;
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime runtime) {
-        jeiRuntime = runtime;
-
+        RUNTIME = runtime;
     }
 
-    public static IJeiRuntime getRuntime() {
-        return jeiRuntime;
-    }
+    public static @Nullable IJeiRuntime getRuntime() { return RUNTIME; }
 
 }

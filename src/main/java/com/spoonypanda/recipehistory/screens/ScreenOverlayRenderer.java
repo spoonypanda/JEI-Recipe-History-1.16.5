@@ -29,20 +29,32 @@ import net.minecraftforge.fml.client.gui.GuiUtils;
 
 public class ScreenOverlayRenderer {
 
+
     public static void renderHistoryOverlay(Screen screen, MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
         if (!(screen instanceof ContainerScreen || screen instanceof RecipesGui)) return;
 
         Rectangle2d bounds = JEIHooks.getJeiItemListReservedArea();
         if (bounds == null) return;
 
+        RenderSystem.pushMatrix();
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.color4f(1f, 1f, 1f, 1f);
+
         drawTopBorder(ms, bounds.getX(), bounds.getY(), bounds.getWidth(), 3, 2,
                 Config.getStyleColorARGB(),Config.SEPARATOR_STYLE.get());
 
         IJeiRuntime runtime = RecipeHistoryJEIPlugin.getRuntime();
-        if (runtime == null) return;
+        if (runtime == null){
+            restore();
+            return;
+        }
 
         List<HistoryEntry> entries = JEIHooks.getRecentlyViewedEntries();
-        if (entries.isEmpty()) return;
+        if (entries.isEmpty()){
+            restore();
+            return;
+        }
 
         int slotSize = 18;
         int columns = bounds.getWidth() / slotSize;
@@ -51,7 +63,6 @@ public class ScreenOverlayRenderer {
         int xStart = bounds.getX();
         int yStart = bounds.getY();
 
-        RenderSystem.enableDepthTest();
 
         HistoryEntry hoveredEntry = null;
         int hoveredX = -1;
@@ -85,7 +96,6 @@ public class ScreenOverlayRenderer {
                     ITooltipFlag.TooltipFlags.ADVANCED : ITooltipFlag.TooltipFlags.NORMAL;
             List<ITextComponent> tooltip = renderer.getTooltip(ingredient, flag);
             tooltip.add(new StringTextComponent(TextFormatting.BLUE + hoveredEntry.getModName()));
-
             ms.pushPose();
             ms.translate(0, 0, 300);
             AbstractGui.fill(ms, hoveredX, hoveredY, hoveredX + slotSize, hoveredY + slotSize,
@@ -95,6 +105,14 @@ public class ScreenOverlayRenderer {
             GuiUtils.drawHoveringText(ms, tooltip, mouseX, mouseY, screen.width, screen.height, -1,
                     Minecraft.getInstance().font);
         }
+
+        restore();
+    }
+
+    private static void restore() {
+        RenderSystem.color4f(1f, 1f, 1f, 1f);
+        RenderSystem.disableBlend();
+        RenderSystem.popMatrix();
     }
 
     private static void drawTopBorder(MatrixStack ms, int x, int y, int width, int dashLength, int gapLength,
@@ -115,12 +133,12 @@ public class ScreenOverlayRenderer {
         }
     }
 
-    public static void handleMouseClicked(Screen screen, int mouseX, int mouseY, int button) {
+    public static boolean handleMouseClicked(Screen screen, int mouseX, int mouseY, int button) {
         Rectangle2d bounds = JEIHooks.getJeiItemListReservedArea();
-        if (bounds == null || !(screen instanceof ContainerScreen || screen instanceof RecipesGui)) return;
+        if (bounds == null || !(screen instanceof ContainerScreen || screen instanceof RecipesGui)) return false;
 
         List<HistoryEntry> entries = JEIHooks.getRecentlyViewedEntries();
-        if (entries.isEmpty()) return;
+        if (entries.isEmpty()) return false;
 
         int slotSize = 18;
         int columns = bounds.getWidth() / slotSize;
@@ -141,7 +159,7 @@ public class ScreenOverlayRenderer {
 
             if (mouseX >= x && mouseX < x + slotSize && mouseY >= y && mouseY < y + slotSize) {
                 IJeiRuntime runtime = RecipeHistoryJEIPlugin.getRuntime();
-                if (runtime == null) return;
+                if (runtime == null) return false;
 
                 IRecipesGui recipesGui = runtime.getRecipesGui();
                 IRecipeManager recipeManager = runtime.getRecipeManager();
@@ -149,9 +167,11 @@ public class ScreenOverlayRenderer {
                 IFocus.Mode mode = (button == 1) ? IFocus.Mode.INPUT : IFocus.Mode.OUTPUT;
                 IFocus<?> focus = recipeManager.createFocus(mode, entry.focus.getValue());
                 recipesGui.show(focus);
+                return true;
             }
             i++;
         }
+        return false;
     }
 
     public static HistoryEntry getHoveredEntryAt(int mouseX, int mouseY) {

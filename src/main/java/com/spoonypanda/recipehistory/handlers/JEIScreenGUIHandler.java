@@ -9,11 +9,11 @@ import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.Rectangle2d;
 
+public class JEIScreenGUIHandler<T extends ContainerScreen<?>>
+        implements IGuiContainerHandler<T> {
 
-
-public class JEIScreenGUIHandler implements IGuiContainerHandler<ContainerScreen<?>> {
     @Override
-    public List<Rectangle2d> getGuiExtraAreas(ContainerScreen<?> screen) {
+    public List<Rectangle2d> getGuiExtraAreas(T screen) {
         return JEIHooks.getReservedGuiAreas();
     }
 }
